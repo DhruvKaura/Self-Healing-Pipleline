@@ -13,7 +13,7 @@ app = FastAPI(
     title=settings.APP_NAME,
 )
 
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 @app.get("/")
 def home():
