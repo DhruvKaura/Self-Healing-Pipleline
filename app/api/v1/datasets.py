@@ -17,6 +17,10 @@ from app.services.schema_validator import SchemaValidator
 
 from app.services.healing_service import HealingService
 
+from app.repositories.healing_log_repository import (
+    HealingLogRepository
+)
+
 router = APIRouter()
 
 
@@ -59,6 +63,9 @@ def upload_dataset(
             expected_columns=SchemaValidator.EXPECTED_SCHEMA,
             actual_columns=columns
         )
+    print("\n========== AI GENERATED MAPPING ==========")
+    print(mapping)
+    print("=========================================\n")
 
     healed_validation = None
 
@@ -67,13 +74,20 @@ def upload_dataset(
             df=df,
             mapping=mapping
         )
-    healed_columns = CSVService.get_columns(
-        healed_df
-    )
+        healed_columns = CSVService.get_columns(
+            healed_df
+        )
 
-    healed_validation = SchemaValidator.validate(
-        healed_columns
-    )
+        healed_validation = SchemaValidator.validate(
+            healed_columns
+        )
+
+        HealingLogRepository.create(
+        db=db,
+        dataset_id=str(dataset.id),
+        original_columns=columns,
+        generated_mapping=mapping
+        )
     return {
         "dataset_id": str(dataset.id),
         "filename": file.filename,
@@ -82,3 +96,12 @@ def upload_dataset(
         "mapping": mapping,
         "healed_validation": healed_validation
     }
+
+@router.get("/healing-logs")
+def get_healing_logs(
+    db: Session = Depends(get_db)
+):
+
+    logs = HealingLogRepository.get_all(db)
+
+    return logs
