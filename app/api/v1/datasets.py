@@ -21,6 +21,8 @@ from app.repositories.healing_log_repository import (
     HealingLogRepository
 )
 
+from app.services.pipeline_service import PipelineService
+
 router = APIRouter()
 
 
@@ -45,57 +47,12 @@ def upload_dataset(
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
 ):
-    
-    dataset = DatasetRepository.create(
-        db=db,
-        filename=file.filename
+
+    return PipelineService.process_dataset(
+        file=file,
+        db=db
     )
 
-    df = CSVService.read_csv(file.file)
-
-    columns = CSVService.get_columns(df)
-    validation_result = SchemaValidator.validate(columns)
-
-    mapping = None
-
-    if not validation_result["valid"]:
-        mapping = HealingService.generate_mapping(
-            expected_columns=SchemaValidator.EXPECTED_SCHEMA,
-            actual_columns=columns
-        )
-    print("\n========== AI GENERATED MAPPING ==========")
-    print(mapping)
-    print("=========================================\n")
-
-    healed_validation = None
-
-    if mapping:
-        healed_df = CSVService.apply_mapping(
-            df=df,
-            mapping=mapping
-        )
-        healed_columns = CSVService.get_columns(
-            healed_df
-        )
-
-        healed_validation = SchemaValidator.validate(
-            healed_columns
-        )
-
-        HealingLogRepository.create(
-        db=db,
-        dataset_id=str(dataset.id),
-        original_columns=columns,
-        generated_mapping=mapping
-        )
-    return {
-        "dataset_id": str(dataset.id),
-        "filename": file.filename,
-        "original_columns": columns,
-        "validation": validation_result,
-        "mapping": mapping,
-        "healed_validation": healed_validation
-    }
 
 @router.get("/healing-logs")
 def get_healing_logs(

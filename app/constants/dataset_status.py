@@ -1,0 +1,6 @@
+class DatasetStatus:
+    UPLOADED = "UPLOADED"
+    VALIDATING = "VALIDATING"
+    HEALING = "HEALING"
+    COMPLETED = "COMPLETED"
+    FAILED = "FAILED"

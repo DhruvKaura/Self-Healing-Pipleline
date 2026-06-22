@@ -20,3 +20,17 @@ class DatasetRepository:
         db.refresh(dataset)
 
         return dataset
+    
+    @staticmethod
+    def update_status(
+        db,
+        dataset,
+        status
+    ):
+
+        dataset.status = status
+
+        db.commit()
+        db.refresh(dataset)
+
+        return dataset
