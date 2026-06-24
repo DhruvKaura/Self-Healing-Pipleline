@@ -1,27 +1,21 @@
-name: Self-Healing Pipeline CI
+name: CI
 
 on:
 push:
-branches:
-- main
+branches: [main]
 
 pull_request:
-branches:
-- main
+branches: [main]
 
 jobs:
-
 test:
-
-```
 runs-on: ubuntu-latest
 
+```
 steps:
+  - uses: actions/checkout@v4
 
-  - name: Checkout Repository
-    uses: actions/checkout@v4
-
-  - name: Set Up Python
+  - name: Setup Python
     uses: actions/setup-python@v5
     with:
       python-version: "3.12"
@@ -31,22 +25,19 @@ steps:
       python -m pip install --upgrade pip
       pip install -r requirements.txt
 
-  - name: Verify Imports
+  - name: Run Tests
     run: |
-      python -c "from app.main import app; print('Application Loaded Successfully')"
+      pytest
 ```
 
 docker-build:
-
-```
 runs-on: ubuntu-latest
 
+```
 needs: test
 
 steps:
-
-  - name: Checkout Repository
-    uses: actions/checkout@v4
+  - uses: actions/checkout@v4
 
   - name: Build Docker Image
     run: |
