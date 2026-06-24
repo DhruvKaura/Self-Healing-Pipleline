@@ -47,16 +47,11 @@ Return JSON only.
 
         content = response["message"]["content"]
 
-        print("========== RAW RESPONSE ==========")
-        print(content)
-        print("==================================")
 
         content = content.replace("```json", "")
         content = content.replace("```", "")
         content = content.strip()
 
         mapping = json.loads(content)
-
-        print("Parsed Mapping:", mapping)
 
         return mapping
