@@ -50,21 +50,6 @@ The pipeline automatically:
 
 ---
 
-## Architecture
-
-CSV Upload
-↓
-FastAPI
-↓
-Pipeline Service
-↓
-Schema Validator
-↓
-Healing Service (Phi-3)
-↓
-PostgreSQL
-
----
 
 ## Features
 
