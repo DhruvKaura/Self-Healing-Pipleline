@@ -6,27 +6,18 @@ from app.models.dataset import Dataset
 class DatasetRepository:
 
     @staticmethod
-    def create(
-        db: Session,
-        filename: str
-    ):
+    def create(db: Session, filename: str):
 
-        dataset = Dataset(
-            filename=filename
-        )
+        dataset = Dataset(filename=filename)
 
         db.add(dataset)
         db.commit()
         db.refresh(dataset)
 
         return dataset
-    
+
     @staticmethod
-    def update_status(
-        db,
-        dataset,
-        status
-    ):
+    def update_status(db, dataset, status):
 
         dataset.status = status
 

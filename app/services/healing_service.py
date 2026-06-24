@@ -1,14 +1,12 @@
 import json
+
 from ollama import chat
 
 
 class HealingService:
 
     @staticmethod
-    def generate_mapping(
-        expected_columns,
-        actual_columns
-    ):
+    def generate_mapping(expected_columns, actual_columns):
 
         prompt = f"""
 You are an expert data engineer.
@@ -35,18 +33,9 @@ Do not explain.
 Do not use markdown.
 Return JSON only.
 """
-        response = chat(
-            model="phi3",
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-        )
+        response = chat(model="phi3", messages=[{"role": "user", "content": prompt}])
 
         content = response["message"]["content"]
-
 
         content = content.replace("```json", "")
         content = content.replace("```", "")

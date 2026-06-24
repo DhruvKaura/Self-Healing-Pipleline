@@ -3,11 +3,7 @@ from app.services.schema_validator import SchemaValidator
 
 def test_valid_schema():
 
-    columns = [
-        "id",
-        "price",
-        "transaction_date"
-    ]
+    columns = ["id", "price", "transaction_date"]
 
     result = SchemaValidator.validate(columns)
 
@@ -17,10 +13,7 @@ def test_valid_schema():
 
 def test_missing_columns():
 
-    columns = [
-        "user_id",
-        "cost"
-    ]
+    columns = ["user_id", "cost"]
 
     result = SchemaValidator.validate(columns)
 

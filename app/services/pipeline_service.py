@@ -1,11 +1,9 @@
+from app.constants.dataset_status import DatasetStatus
 from app.repositories.dataset_repository import DatasetRepository
 from app.repositories.healing_log_repository import HealingLogRepository
-
 from app.services.csv_service import CSVService
-from app.services.schema_validator import SchemaValidator
 from app.services.healing_service import HealingService
-
-from app.constants.dataset_status import DatasetStatus
+from app.services.schema_validator import SchemaValidator
 
 
 class PipelineService:
@@ -14,25 +12,18 @@ class PipelineService:
     def process_dataset(file, db):
 
         # Create Dataset
-        dataset = DatasetRepository.create(
-            db=db,
-            filename=file.filename
-        )
+        dataset = DatasetRepository.create(db=db, filename=file.filename)
 
         # Dataset Uploaded
         DatasetRepository.update_status(
-            db=db,
-            dataset=dataset,
-            status=DatasetStatus.UPLOADED
+            db=db, dataset=dataset, status=DatasetStatus.UPLOADED
         )
 
         try:
 
             # Validation Started
             DatasetRepository.update_status(
-                db=db,
-                dataset=dataset,
-                status=DatasetStatus.VALIDATING
+                db=db, dataset=dataset, status=DatasetStatus.VALIDATING
             )
 
             # Read CSV
@@ -42,9 +33,7 @@ class PipelineService:
             columns = CSVService.get_columns(df)
 
             # Validate Schema
-            validation_result = SchemaValidator.validate(
-                columns
-            )
+            validation_result = SchemaValidator.validate(columns)
 
             mapping = None
             healed_validation = None
@@ -53,41 +42,30 @@ class PipelineService:
             if not validation_result["valid"]:
 
                 DatasetRepository.update_status(
-                    db=db,
-                    dataset=dataset,
-                    status=DatasetStatus.HEALING
+                    db=db, dataset=dataset, status=DatasetStatus.HEALING
                 )
 
                 mapping = HealingService.generate_mapping(
                     expected_columns=SchemaValidator.EXPECTED_SCHEMA,
-                    actual_columns=columns
+                    actual_columns=columns,
                 )
 
-                healed_df = CSVService.apply_mapping(
-                    df=df,
-                    mapping=mapping
-                )
+                healed_df = CSVService.apply_mapping(df=df, mapping=mapping)
 
-                healed_columns = CSVService.get_columns(
-                    healed_df
-                )
+                healed_columns = CSVService.get_columns(healed_df)
 
-                healed_validation = SchemaValidator.validate(
-                    healed_columns
-                )
+                healed_validation = SchemaValidator.validate(healed_columns)
 
                 HealingLogRepository.create(
                     db=db,
                     dataset_id=str(dataset.id),
                     original_columns=columns,
-                    generated_mapping=mapping
+                    generated_mapping=mapping,
                 )
 
             # Processing Completed Successfully
             DatasetRepository.update_status(
-                db=db,
-                dataset=dataset,
-                status=DatasetStatus.COMPLETED
+                db=db, dataset=dataset, status=DatasetStatus.COMPLETED
             )
 
             return {
@@ -97,16 +75,14 @@ class PipelineService:
                 "validation": validation_result,
                 "mapping": mapping,
                 "healed_validation": healed_validation,
-                "status": dataset.status
+                "status": dataset.status,
             }
 
         except Exception as e:
 
             # Processing Failed
             DatasetRepository.update_status(
-                db=db,
-                dataset=dataset,
-                status=DatasetStatus.FAILED
+                db=db, dataset=dataset, status=DatasetStatus.FAILED
             )
 
             raise e
